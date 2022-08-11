@@ -1,0 +1,2 @@
+Features:
+Assignees to be a vector - I would like to have a filter task menu, and I would like one of the options to be a 'filter by assignee'
