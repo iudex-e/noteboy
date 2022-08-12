@@ -20,6 +20,15 @@ class task {
         std::vector<std::string> assignees, associated;
 };
 
+task::task(){
+    this -> date_as = "";
+    this -> date_due ="";
+    this -> taskNam = "";
+    this -> taskDes = "";
+    this -> priority = "";
+    this -> assignees = std::vector<std::string>();
+    this -> associated = std::vector<std::string>();
+}
 
 
 void task::createTask(std::string d_a, std::string d_d, std::string t_n, std::string t_d, std::string asi, std::string pri, std::string aso){
@@ -111,6 +120,7 @@ std::string task::getPiece(std::string temp){
         }
         return to_ret;
     }
+    return "";
 }
 
 std::string task::getTask(){
