@@ -1,4 +1,6 @@
 //noteboy.cpp (2022) Evan Kamuf
+
+//lib
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,22 +9,71 @@
 #include <stdio.h>
 #include "conio.h"
 #include <array>
+#include <limits>
 #include <istream>
+#include <sstream>
 
+//include
 #include "task.h"
 
-
+//macros
 #define watch(x) return (#x)
+
+//globals
 task taskz;
 std::vector<task> tasks;
-
 int has_opened;
+
+
+std::fstream& GotoLine(std::fstream& file, unsigned int num){
+    file.seekg(std::ios::beg);
+    for(int i=0; i < num - 1; ++i){
+        file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
+    }
+    return file;
+}
 
 void tapstate(){
     std::ofstream fs;
     fs.open("taskstate.csv");
     fs.close();
     has_opened = 1;
+}
+
+std::string fCheck(std::string target, std::string options){
+    std::string result = "false";
+    std::string line;
+    int counter = 0;
+    std::ifstream fs("taskstate.csv");
+    while(std::getline(fs, line)){
+        if(line.find(target)){
+            result = "true";
+        }
+         counter += 1;
+    }
+    if(options == "u"){
+        return std::to_string(counter);
+    }else if(options == "n"){
+        return result;
+    }
+}
+
+void fUpdate(std::string target, std::string key, std::string replaceStr, int location){
+    std::string prebuff;
+    int lnum = std::stoi(fCheck(target, "u"));
+    std::ofstream fs("taskstate.csv");
+    std::stringstream buffer_in;
+    buffer_in << fs.rdbuf();
+    fs.close();
+    std::fstream fs("taskstate.csv");
+    std::string bufferConv = buffer_in.str();
+    std::string t_grab = tasks.at(location).getTask();
+    bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
+    //GotoLine(fs, lnum);
+    fs.write(bufferConv.c_str(), bufferConv.size());
+    fs.close();
+    //You need to figure out how to consistently grab a part of the line that needs to be modified      ??prebuff.replace()---_______????
+    fs.close();
 }
 
 void savestatewrite(){
@@ -71,6 +122,17 @@ std::string dirInterpreter(std::string inp){
     return to_ret;
 }
 
+void interWrite(std::string taskName, std::string key, std::string replaceStr, int location){
+    std::string wType;
+    wType = fCheck(taskName, "n");
+
+    if(wType == "true"){
+        //Function to update the line with corresponding info
+        fUpdate(taskName, key, replaceStr, location);
+    }else{
+        //Function to append at end
+    }
+}
 
 void taskFiller(int location){
     std::string msg, temp, name, desc, aDate, dDate, priority, associated, assignee;
@@ -101,6 +163,7 @@ void taskFiller(int location){
         return;
     }else{
         tasks.at(location).pieceTask(temp, move);
+        interWrite(tasks.at(location).getPiece("tName"), tasks.at(location).getPiece(dirInterpreter(move)), temp, location);
         //actually set
         return;
     }
@@ -145,16 +208,17 @@ void loadstate(){
 }
 
 int motion_interpret(char act){
+    int to_ret;
 
-    if(std::to_stringstd::to_string(act)) == "n"){
+    if(std::to_string(act) == "n"){
         to_ret = 1;
         return to_ret;
 
-    }else ifstd::to_string(act) == "m"){
+    }else if(std::to_string(act) == "m"){
         to_ret = 2;
         return to_ret;
 
-    }else ifstd::to_string(act) == "c"){
+    }else if(std::to_string(act) == "c"){
         to_ret = 3;
         return to_ret;
 
@@ -162,12 +226,12 @@ int motion_interpret(char act){
 
     //Probably more options
 
-    else ifstd::to_string(act) == "f"){
+    else if(std::to_string(act) == "f"){
         to_ret = 4;
         return to_ret;
     }
 
-    else ifstd::to_string(act) == "q"){
+    else if(std::to_string(act) == "q"){
         to_ret == 9;
         return to_ret;
     }
