@@ -1,2 +1,11 @@
 Features:
 Assignees to be a vector - I would like to have a filter task menu, and I would like one of the options to be a 'filter by assignee'
+
+
+
+notes:
+    -Relying on attribute location consistency to assign information to task vector will require two sets of vectors to behave differently.
+        -Firstly, there's the vector of all tasks. An individual task (that can have it's assigned data marker tied to a vector [or array, but we are using vector for the dynamic size]) has its keys and values stored within
+        a file upon load the same time each way.
+            -There are two other vectors, and they actually belong to the task itself when it is declared. These vectors are 'assignees' and 'associated tasks'. Even though there are two different levels of data where vectors
+             are applicable, their info needs to be deliminated in two different ways (comma separation for task keys, and maybe ' | ' to separate elements in that tasks 'assignees' key or 'associated tass' key).

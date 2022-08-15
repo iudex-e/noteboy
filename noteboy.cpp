@@ -1,5 +1,4 @@
 //noteboy.cpp (2022) Evan Kamuf
-
 //lib
 #include <iostream>
 #include <fstream>
@@ -7,13 +6,12 @@
 #include <vector>
 #include <cstdlib>
 #include <stdio.h>
-#include "conio.h"
 #include <array>
 #include <limits>
 #include <istream>
 #include <sstream>
 
-//include
+//in-house include
 #include "task.h"
 
 //macros
@@ -38,6 +36,14 @@ void tapstate(){
     fs.open("taskstate.csv");
     fs.close();
     has_opened = 1;
+}
+
+void delFromFile(){
+    
+}
+
+void deltask(int location){
+
 }
 
 std::string fCheck(std::string target, std::string options){
@@ -65,15 +71,14 @@ void fUpdate(std::string target, std::string key, std::string replaceStr, int lo
     std::stringstream buffer_in;
     buffer_in << fs.rdbuf();
     fs.close();
-    std::fstream fs("taskstate.csv");
+    std::fstream wfs("taskstate.csv");
     std::string bufferConv = buffer_in.str();
     std::string t_grab = tasks.at(location).getTask();
     bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
     //GotoLine(fs, lnum);
-    fs.write(bufferConv.c_str(), bufferConv.size());
-    fs.close();
+    wfs.write(bufferConv.c_str(), bufferConv.size());
     //You need to figure out how to consistently grab a part of the line that needs to be modified      ??prebuff.replace()---_______????
-    fs.close();
+    wfs.close();
 }
 
 void savestatewrite(){
@@ -242,7 +247,7 @@ int parentmost_menu(){
     //function called to display tasks formatted
     //options
     std::cout << "Select: ";
-    char inprtn = getch();
+    char inprtn = getchar();
     int choice = motion_interpret(inprtn);
 
     if(choice == 0){
