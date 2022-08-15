@@ -31,6 +31,14 @@ std::fstream& GotoLine(std::fstream& file, unsigned int num){
     return file;
 }
 
+void disAll(){
+    //This guy needs to be formatted better  --- More longitudenal involvement? Viewport based display?
+
+    for(int i=0; i < sizeof(tasks); i++){
+        std::cout << tasks.at(i).getTask() << std::endl;
+    }
+}
+
 void tapstate(){
     std::ofstream fs;
     fs.open("taskstate.csv");
@@ -38,12 +46,62 @@ void tapstate(){
     has_opened = 1;
 }
 
-void delFromFile(){
+int delFromFile(int location){
     
+    std::string t_line;
+    int lncount = 0;
+    bool alter = false;
+
+    try {
+        std::ifstream fs("taskstate.csv");
+        std::ofstream ofs;
+        if(!fs.is_open()){
+            throw(1);   
+
+        }
+        fs.close();
+
+        while (std::getline(fs, t_line))
+        {
+                if(t_line.find(tasks.at(location).getPiece("tName")) == true){
+
+                    ofs.open("taskstate.csv");
+                    t_line.replace(t_line.find(lncount), sizeof(t_line.find(lncount)), "");
+                    ofs << t_line << std::endl;
+                    alter = true;
+            lncount += 1;
+        }
+         ofs.close();
+        
+        if(alter == false){
+            throw(1);
+        }
+        std::cout <<"Deletion of task in file: successful\n";
+        }
+    }
+
+    catch (int exc){
+        if(exc == 1){
+            std::cout << "Trouble initializing to read?!\n";
+        }
+        if(exc == 2){
+            std::cout << "Deletion of task in file: failed\n";
+        }
+    }
 }
 
 void deltask(int location){
-
+    try {
+        tasks.erase(tasks.begin() + location);
+    }
+    catch (int d_code){
+        if(d_code == 0){
+            std::cout << "Deletion of task in session: succesful\n";
+        }
+        if(d_code == 1){
+            std::cout << "Deletion of task in session: failed\n";
+        }
+    }
 }
 
 std::string fCheck(std::string target, std::string options){
@@ -245,6 +303,7 @@ int motion_interpret(char act){
 
 int parentmost_menu(){
     //function called to display tasks formatted
+    disAll();
     //options
     std::cout << "Select: ";
     char inprtn = getchar();
