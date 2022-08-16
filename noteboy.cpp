@@ -1,5 +1,7 @@
 //noteboy.cpp (2022) Evan Kamuf
+
 //lib
+#include <iterator>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,6 +12,15 @@
 #include <limits>
 #include <istream>
 #include <sstream>
+#include <regex>
+
+/*using namespace conmanip;*/
+
+//Host-specific includes
+#include <windows.h>
+
+//External Includes
+#include <conmanip.h>
 
 //in-house include
 #include "task.h"
@@ -21,6 +32,23 @@
 task taskz;
 std::vector<task> tasks;
 int has_opened;
+conmanip::console_out_context ctxout;
+conmanip::console_out conout(ctxout);
+
+
+int dimensionSpecficiation(){
+    //24 pixels per row
+    //11~ pixels per column
+
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns, rows;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    return rows, columns;
+}
 
 
 std::fstream& GotoLine(std::fstream& file, unsigned int num){
@@ -132,10 +160,11 @@ void fUpdate(std::string target, std::string key, std::string replaceStr, int lo
     std::fstream wfs("taskstate.csv");
     std::string bufferConv = buffer_in.str();
     std::string t_grab = tasks.at(location).getTask();
-    bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
-    //GotoLine(fs, lnum);
-    wfs.write(bufferConv.c_str(), bufferConv.size());
-    //You need to figure out how to consistently grab a part of the line that needs to be modified      ??prebuff.replace()---_______????
+
+    //bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
+    
+    std::regex_replace(bufferConv, std::regex(fileExpr(keyToDir(key))), replaceStr);    //Uses regex_replace to run-through file. Replaces matched string with 'replaceStr'
+    wfs.write(bufferConv.c_str(), bufferConv.size());                                   //Overwrites entire file with the change. This DOES NOT make isolated changes/re-writes.
     wfs.close();
 }
 
@@ -157,7 +186,32 @@ void savestatewrite(){
 }
 
 void requestInterpret(std::string key, std::string value, int location){
+    
+}
 
+std::string keyToDir(std::string key){
+       std::string to_ret;
+
+    if(key == "tDesc"){
+        to_ret = "tDesc";
+
+    }else if(key == "priority"){
+        to_ret = "priority";
+
+    }else if(key == "associated"){
+        to_ret = "";
+
+    }else if(key == "assignee"){
+        to_ret = "assignee";
+
+    }else if(key == "date_a"){
+        to_ret = "date_a";
+
+    }else if(key == "date_d"){
+        to_ret = "date_d";
+
+    }
+    return to_ret;
 }
 
 std::string dirInterpreter(std::string inp){
@@ -185,15 +239,62 @@ std::string dirInterpreter(std::string inp){
     return to_ret;
 }
 
+std::string fileExpr(std::string directed){
+    
+    std::string proper;
+
+    //These regular expression represnetations need to utilize the 'match' not the group. The match contains references to GET TO the match
+
+    if(directed == "tDesc"){
+
+        proper = "ion:.(.*)";
+
+    }else if(directed =="tName"){
+
+        proper = "\\)(.*)";
+
+    }else if(directed == "priority"){
+
+        std::string prpoer = "\\((.*)\\)";
+
+    }else if(directed == "associated"){
+
+        proper = "sks:.(.*)";
+
+    }else if(directed == "assignee"){
+
+        proper = "ees:.(.*)";
+
+    }else if(directed == "date_a"){
+    
+        proper = "ned:.(.*)";
+
+    }else if(directed == "date_d"){
+        proper = "ue:.(.*)";
+    }else {
+        std::cout << "Issue at 'fileExpr'~~ a direction is not conditionally exppresed or passed properly in this function. You are not meant to see this message.\n"
+        << "Please diagnose this and recompile.\n";
+    }
+
+    return proper;
+
+}
+
 void interWrite(std::string taskName, std::string key, std::string replaceStr, int location){
     std::string wType;
     wType = fCheck(taskName, "n");
 
     if(wType == "true"){
-        //Function to update the line with corresponding info
+
         fUpdate(taskName, key, replaceStr, location);
-    }else{
+
+    }else if(wType == "false"){
+
         //Function to append at end
+
+    } else{
+        std::cout << "on iterWrite()~~ conditional exception occured (this is manually documented.\nThis message is not supposed to be visible.\n" <<
+        "If you see this output, please diagnose this and recompile." << std::endl;
     }
 }
 
@@ -332,7 +433,10 @@ void loadfi(){
     }
 }
 
-int main(){
+int main(int argc, char *argv[]){
+
+    conout.settitle("Noteboy");
+
     int option;
     std::string qConfirm = "";
     //Startup options
