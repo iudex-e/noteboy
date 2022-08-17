@@ -90,21 +90,22 @@ int delFromFile(int location){
         fs.close();
 
         while (std::getline(fs, t_line))
-        {
+            {
                 if(t_line.find(tasks.at(location).getPiece("tName")) == true){
 
                     ofs.open("taskstate.csv");
                     t_line.replace(t_line.find(lncount), sizeof(t_line.find(lncount)), "");
                     ofs << t_line << std::endl;
                     alter = true;
-            lncount += 1;
-        }
-         ofs.close();
+                    lncount += 1;
+                }
+            ofs.close();
         
-        if(alter == false){
-            throw(1);
-        }
-        std::cout <<"Deletion of task in file: successful\n";
+            if(alter == false){
+                throw(2);
+            }else{
+                std::cout <<"Deletion of task in file: successful\n";
+            }
         }
     }
 
@@ -150,23 +151,6 @@ std::string fCheck(std::string target, std::string options){
     }
 }
 
-void fUpdate(std::string target, std::string key, std::string replaceStr, int location){
-    std::string prebuff;
-    int lnum = std::stoi(fCheck(target, "u"));
-    std::ofstream fs("taskstate.csv");
-    std::stringstream buffer_in;
-    buffer_in << fs.rdbuf();
-    fs.close();
-    std::fstream wfs("taskstate.csv");
-    std::string bufferConv = buffer_in.str();
-    std::string t_grab = tasks.at(location).getTask();
-
-    //bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
-    
-    std::regex_replace(bufferConv, std::regex(fileExpr(keyToDir(key))), replaceStr);    //Uses regex_replace to run-through file. Replaces matched string with 'replaceStr'
-    wfs.write(bufferConv.c_str(), bufferConv.size());                                   //Overwrites entire file with the change. This DOES NOT make isolated changes/re-writes.
-    wfs.close();
-}
 
 void savestatewrite(){
     std::ofstream fs;
@@ -279,6 +263,23 @@ std::string fileExpr(std::string directed){
     return proper;
 
 }
+void fUpdate(std::string target, std::string key, std::string replaceStr, int location){
+    std::string prebuff;
+    int lnum = std::stoi(fCheck(target, "u"));
+    std::ofstream fs("taskstate.csv");
+    std::stringstream buffer_in;
+    buffer_in << fs.rdbuf();
+    fs.close();
+    std::fstream wfs("taskstate.csv");
+    std::string bufferConv = buffer_in.str();
+    std::string t_grab = tasks.at(location).getTask();
+
+    //bufferConv.replace(buffer_in.str().find(tasks.at(location).getPiece(key)), tasks.at(location).getPiece(key).size(), replaceStr);
+    
+    std::regex_replace(bufferConv, std::regex(fileExpr(keyToDir(key))), replaceStr);    //Uses regex_replace to run-through file. Replaces matched string with 'replaceStr'
+    wfs.write(bufferConv.c_str(), bufferConv.size());                                   //Overwrites entire file with the change. This DOES NOT make isolated changes/re-writes.
+    wfs.close();
+}
 
 void interWrite(std::string taskName, std::string key, std::string replaceStr, int location){
     std::string wType;
@@ -318,18 +319,19 @@ void taskFiller(int location){
     std::cout << msg << "Enter a value/label for one of the following: ";
     std::cin >> temp;
     std::string move;
-    std::cout << "What keys to '" << temp << "'? (D)escription, (P)riority, (A)ssociated Tasks\nAssignees use (B)oss, A(S)igned date, (X)Due Date:\n ";
-    move = getchar();
 
-    std::string chck = taskz.getPiece(dirInterpreter(move));
+    std::string conf = "n";
 
-    if(chck != ""){
-        return;
-    }else{
-        tasks.at(location).pieceTask(temp, move);
-        interWrite(tasks.at(location).getPiece("tName"), tasks.at(location).getPiece(dirInterpreter(move)), temp, location);
-        //actually set
-        return;
+    while(conf != "y" || conf != "Y"){
+        std::cout << "What keys to '" << temp << "'? (D)escription, (P)riority, (A)ssociated Tasks\nAssignees use (B)oss, A(S)signed date, (X)Due Date:\n" << "Press 'y'/'Y' to end submission: ";
+        move = getchar();
+
+        std::string chck = taskz.getPiece(dirInterpreter(move));
+
+        if(chck == ""){
+            tasks.at(location).pieceTask(temp, move);
+            interWrite(tasks.at(location).getPiece("tName"), tasks.at(location).getPiece(dirInterpreter(move)), temp, location);
+        }
     }
 
 }
@@ -351,7 +353,7 @@ void newTask(){
         std::cout << "Would you like to continue filling out task: " << tName << "?\n(y)es (n)o: ";
         choice = getchar();
         if(choice == "y" || choice == "Y"){
-            taskFiller(int( sizeof(tasks) - 1 ));  //This passed int is supposed to represent the latest (currently being created/modified) task. If incorrect or unoptimal, please replace.
+            taskFiller( int ( sizeof ( tasks ) - 1 ) );  //This passed int is supposed to represent the latest (currently being created/modified) task. If incorrect or unoptimal, please replace.
         }
     }
 }
@@ -421,16 +423,23 @@ int parentmost_menu(){
 }
 
 void loadfi(){
+
     std::ifstream fs;
     fs.open("taskstate.csv");
+
     if(!fs.is_open()){
+
         fs.close();
         tapstate();
+
     } else {
+
         fs.close();
-        has_opened = 1;
         loadstate();
+
     }
+
+    has_opened = 1;
 }
 
 int main(int argc, char *argv[]){
