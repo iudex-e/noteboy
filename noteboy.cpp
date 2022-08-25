@@ -38,16 +38,25 @@ conmanip::console_out conout(ctxout);
 void showAll(){
     //Display this information formatted with conmanip
     for(int i = 0; i < sizeof(taskz); i++){
+        std::string priorityPrefix;
+        if(tasks.at(i).getPiece("assignees") == "MED" || tasks.at(i).getPiece("assignees") == "HIGH"){
+            priorityPrefix = "By Order Of: ";
+        } else {
+            priorityPrefix = "Per Request Of: ";
+        }
+
     std::cout
       << settextcolor(conmanip::console_text_colors::light_yellow)
       << setbgcolor(conmanip::console_bg_colors::black)
       << tasks.at(i).getPiece("tName")
       << "\n"
       << settextcolor(conmanip::console_text_colors::light_blue)
-      << setbgcolor(conmanip::console_bg_colors::white) << std::endl;
-      std::cout
-      << "\"" << tasks.at(i).getPiece("date_d") << "\"" << tasks.at(i)getPiece("priority");
-      //Finish - incomplete
+      << setbgcolor(conmanip::console_bg_colors::white)
+      << "\"" << tasks.at(i).getPiece("date_d") << "\" " << tasks.at(i).getPiece("priority") << "\n"
+      << "Assigned: " << tasks.at(i).getPiece("date_a") << " Due: " << tasks.at(i).getPiece("date_d")
+      << priorityPrefix << tasks.at(i).getPiece("assignee")
+      << tasks.at(i).getPiece("tDesc") << "\n"
+      << tasks.at(i).getPiece("associated") << "\n";
     }
 }
 
