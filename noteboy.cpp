@@ -35,6 +35,22 @@ int has_opened;
 conmanip::console_out_context ctxout;
 conmanip::console_out conout(ctxout);
 
+void showAll(){
+    //Display this information formatted with conmanip
+    for(int i = 0; i < sizeof(taskz); i++){
+    std::cout
+      << settextcolor(conmanip::console_text_colors::light_yellow)
+      << setbgcolor(conmanip::console_bg_colors::black)
+      << tasks.at(i).getPiece("tName")
+      << "\n"
+      << settextcolor(conmanip::console_text_colors::light_blue)
+      << setbgcolor(conmanip::console_bg_colors::white) << std::endl;
+      std::cout
+      << "\"" << tasks.at(i).getPiece("date_d") << "\"" << tasks.at(i)getPiece("priority");
+      //Finish - incomplete
+    }
+}
+
 
 int dimensionSpecficiation(){
     //24 pixels per row
