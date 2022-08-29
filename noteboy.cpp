@@ -60,6 +60,115 @@ void showAll(){
     }
 }
 
+std::string filterDirection(std::string requested){
+
+    std::string to_res;
+
+    if (requested == "c" || requested == "C"){
+        to_res = "date_c";
+    }else if (requested == "a" || requested == "A"){
+        to_res = "date_a";
+    }else if (requested == "d" || requested == "D"){
+        to_res = "date_d";
+    }else if (requested == "p" || requested == "P"){
+        to_res = "priority";
+    } else {
+        to_res = "1";
+    }
+    return to_res;
+}
+
+void filteredMenu(){
+    std::string toFilter, data;
+    std::cout <<"Filter by: (C)ompleted, (A)ssigned Date, (D)ue Date, (P)riority:\n";
+    toFilter = getchar();
+    if(filterDirection(toFilter) == "1"){
+        return;
+    }else{
+        for(int i = 0; i < sizeof(taskz); i++){
+                data = tasks.at(i).getPiece(toFilter);
+            if(data != ""){
+                std::cout << tasks.at(i).getTask() << std::endl;
+            }
+        }
+    }
+
+}
+
+void modItem(int locale, std::string direction){
+
+    std::string alteration, confirmation;
+    std::cout << tasks.at(locale).getTask();
+    if(direction == "t_Name"){
+        std::cout << "Enter new name for " << tasks.at(locale).getPiece("t_Name") << ": ";
+        std::cin >> alteration;
+
+        while(confirmation != "y" || confirmation != "Y"){
+            std::cout << "Change '" << tasks.at(locale).getPiece("t_Name") << "' to '" << alteration <<"?\n(y/n/x)- ";
+            std::cin >> confirmation;
+            if(confirmation == "x" || confirmation == "X"){
+                return;
+            }
+        }
+
+        tasks.at(locale).pieceTask(alteration, "t_Name");
+
+    }else {
+
+        while(confirmation != "y" || confirmation != "Y"){
+            std::cout << direction << " for " << tasks.at(locale).getPiece("t_Name") << ": " << tasks.at(locale).getPiece(direction) << "\n";
+            std::cout << "Original: " << tasks.at(locale).getPiece(direction) << "\n";
+            std::cout << "Enter a new " << direction << " for this task: ";
+            std::cin >> alteration;
+            std::cout << "From -> " << tasks.at(locale).getPiece(direction) << "\tTo -> " << alteration;
+            std::cout <<"Is this modification okay?\n(y/n/x)- ";
+            std::cin >> confirmation;
+            if(confirmation == "x" || confirmation == "X"){
+                return;
+            }
+        }
+
+        tasks.at(locale).pieceTask(alteration, direction);
+
+    }
+}
+
+int t_search(std::string taskName){
+
+    for(int i = 0; i < sizeof(taskz); i++){
+
+        if (tasks.at(i).getPiece("tName").find(taskName)){
+
+            int foundat = i;
+            return foundat;
+        }
+    }
+    return 0;
+}
+
+void modMenu(int location){
+
+    std::string direction;
+    std::cout << tasks.at(location).getTask();
+    std::cout << "(Z)_Return/Exit (D)esc\t(P)riority\t(A)ssociated\t(B)_Assignee\t(S)_Date-Assigned\t(X)_Date-Due: ";
+    std::cin >> direction;
+    if(direction == "z" || direction == "Z"){
+
+        return;
+    }
+
+    direction = dirInterpreter(direction);
+    if(direction == "1"){
+
+        std::cout << "Please try entering your option again!\n";
+        //maybe a brief timed pause?
+        modMenu(location);
+
+    } else {
+
+        modItem(location, direction);
+    }
+}
 
 int dimensionSpecficiation(){
     //24 pixels per row
@@ -82,14 +191,6 @@ std::fstream& GotoLine(std::fstream& file, unsigned int num){
         file.ignore(std::numeric_limits<std::streamsize>::max(),'\n');
     }
     return file;
-}
-
-void disAll(){
-    //This guy needs to be formatted better  --- More longitudenal involvement? Viewport based display?
-
-    for(int i=0; i < sizeof(tasks); i++){
-        std::cout << tasks.at(i).getTask() << std::endl;
-    }
 }
 
 void tapstate(){
@@ -244,7 +345,7 @@ std::string dirInterpreter(std::string inp){
     }else if(inp == "X" || inp == "x"){
         to_ret = "date_d";
 
-    }
+    } else {to_ret = "1";}
     return to_ret;
 }
 
@@ -374,7 +475,7 @@ void newTask(){
     confirmation = getchar();
 
     if(confirmation == "y"){
-        taskz.createTask("", "", tName, "", "", "", "");
+        taskz.createTask("", "", "", tName, "", "", "", "");
         std::cout << "Would you like to continue filling out task: " << tName << "?\n(y)es (n)o: ";
         choice = getchar();
         if(choice == "y" || choice == "Y"){
@@ -431,13 +532,13 @@ int motion_interpret(char act){
 
 int parentmost_menu(){
     //function called to display tasks formatted
-    disAll();
+    //showAll();
     //options
     std::cout << "Select: ";
     char inprtn = getchar();
     int choice = motion_interpret(inprtn);
 
-    if(choice == 0){
+    if(choice <= 0 && choice > 9){
         std::cout << "!Invalid selection!";
         parentmost_menu;
 
@@ -476,23 +577,31 @@ int main(int argc, char *argv[]){
     //Startup options
     loadfi();
     do{
+        std::string tempstr;
         option = parentmost_menu();
         switch(option){
-            case 1: newTask();
+            case 1: showAll();
                 break;
-
-            case 2: //manage / modify / update
+            case 2: filteredMenu();
+            case 3: newTask();
                 break;
-
-            case 3: //complete
+            case 4: //manage / modify / update
+                std::cout << "Enter a task name or number: ";
+                std::cin >> tempstr;
+                int loi = t_search(tempstr);
+                if(loi == 0){
+                    std::cout << "!! Could not find any tasks matching Name or ID '" << tempstr << "'\n";
+                    break;
+                } else{
+                    modMenu(loi);
+                }
                 break;
-            
-            case 4: //filter
+            case 5: //complete
                 break;
-
-            case 9: std::cout<<"Press 'y' to confirm the quit: "; qConfirm = getchar(); break;
-
+            case 9: std::cout<<"Press 'y' to confirm the quit: "; qConfirm = getchar();
+                break;
             default: "Not sure how you got here chief, but good going..\n";
+
         }
 
     }while(qConfirm != "y");

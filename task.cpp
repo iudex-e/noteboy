@@ -9,7 +9,8 @@
 
 task::task(){
     this -> date_as = "";
-    this -> date_due ="";
+    this -> date_due = "";
+    this -> date_com = "";
     this -> taskNam = "";
     this -> taskDes = "";
     this -> priority = "";
@@ -18,12 +19,15 @@ task::task(){
 }
 
 
-void task::createTask(std::string d_a, std::string d_d, std::string t_n, std::string t_d, std::string asi, std::string pri, std::string aso){
+void task::createTask(std::string d_a, std::string d_d, std::string date_c, std::string t_n, std::string t_d, std::string asi, std::string pri, std::string aso){
     if(date_as.empty() && d_a != ""){
         date_as = d_a;
 
     }else if(date_due.empty() && d_d != ""){
         date_due = d_d;
+
+    }else if(date_com.empty() && date_c != ""){
+        date_com = date_c;
 
     }else if(taskNam.empty() && t_n != ""){
         taskNam = t_n;
@@ -50,6 +54,9 @@ void task::pieceTask(std::string temp, std::string where_to){
     }else if(where_to == "date_d"){
         date_due = temp;
 
+    }else if(where_to == "date_c"){
+        date_com = temp;
+
     }else if(where_to == "tName"){
         taskNam = temp;
 
@@ -61,6 +68,8 @@ void task::pieceTask(std::string temp, std::string where_to){
 
     }else if(where_to == "priority"){
         priority = temp;
+    }else if(where_to == "status"){
+
     }
 }
 
@@ -70,6 +79,9 @@ std::string task::getPiece(std::string temp){
 
     }else if(temp == "date_d"){
         return date_due;
+
+    }else if(temp == "date_c"){
+        return date_com;
 
     }else if(temp == "tName"){
         return taskNam;
